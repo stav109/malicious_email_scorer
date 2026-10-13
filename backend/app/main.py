@@ -7,13 +7,14 @@ from fastapi import Depends, FastAPI
 
 from app import config
 from app.schemas import AnalysisResult, EmailInput
+from app.scoring import analyze_email
 from app.security import require_api_key
 
 logger = logging.getLogger("uvicorn.error")
 
 app = FastAPI(
     title="Malicious Email Scorer API",
-    version="0.2.0",
+    version="0.3.0",
     docs_url="/docs" if config.ENABLE_DOCS else None,
     redoc_url=None,
     openapi_url="/openapi.json" if config.ENABLE_DOCS else None,
@@ -35,12 +36,5 @@ def health() -> dict:
     dependencies=[Depends(require_api_key)],
 )
 def analyze(email: EmailInput) -> AnalysisResult:
-    """
-    Placeholder: returns a fixed result.
-    The real analyzers and scoring engine are added in the next steps.
-    """
-    return AnalysisResult(
-        score=0,
-        verdict="safe",
-        reasons=["Analysis not implemented yet"],
-    )
+    """Runs all analyzers on the email and returns the score, verdict and reasons."""
+    return analyze_email(email)
