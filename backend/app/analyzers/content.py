@@ -72,5 +72,5 @@ def analyze(email: EmailInput) -> list[Finding]:
         matched = [p for p in phrases if _contains(text, p)]
         if matched:
             # Quote our own phrase list, not the email text itself
-            findings.append(Finding(signal, points, f"{message} (e.g. \"{matched[0]}\")."))
+            findings.append(Finding(signal, points, f"{message}: \"{matched[0]}\"."))
     return findings

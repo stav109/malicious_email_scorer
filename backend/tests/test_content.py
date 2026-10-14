@@ -40,4 +40,4 @@ def test_each_category_counts_once():
 
 def test_reason_quotes_our_phrase_not_the_email():
     found = content.analyze(make_email(plainBody="<script>URGENT</script>"))
-    assert found[0].reason.endswith('(e.g. "urgent").')
+    assert found[0].reason.endswith(': "urgent".')
