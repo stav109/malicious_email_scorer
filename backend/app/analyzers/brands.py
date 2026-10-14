@@ -13,7 +13,7 @@ BRANDS: dict[str, tuple[list[str], set[str]]] = {
         ["Microsoft", "Outlook", "Office 365", "Office365"],
         {"microsoft.com", "microsoftonline.com", "office.com", "outlook.com", "live.com"},
     ),
-    "google": (["Google", "Gmail"], {"google.com", "youtube.com"}),
+    "google": (["Google", "Gmail"], {"google.com", "youtube.com", "googleapis.com", "googleusercontent.com", "gstatic.com", "googlemail.com"}),
     "amazon": (["Amazon"], {"amazon.com", "amazon.co.uk", "amazonaws.com"}),
     "netflix": (["Netflix"], {"netflix.com"}),
     "facebook": (["Facebook", "Meta"], {"facebook.com", "facebookmail.com", "meta.com"}),
