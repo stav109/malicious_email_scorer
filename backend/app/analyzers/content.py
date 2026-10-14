@@ -13,6 +13,8 @@ import re
 from app.analyzers.base import Finding
 from app.schemas import EmailInput
 
+CATEGORY = "Content"
+
 # category -> (signal, points, explanation, phrases)
 CATEGORIES = [
     (

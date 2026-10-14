@@ -13,3 +13,4 @@ class Finding:
     signal: str   # stable machine-readable id, e.g. "dmarc_fail"
     points: int   # how much risk this adds to the score
     reason: str   # explanation shown to the user
+    category: str = ""  # which analyzer produced it; set by the scoring engine

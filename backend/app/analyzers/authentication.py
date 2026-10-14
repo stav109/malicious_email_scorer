@@ -14,6 +14,8 @@ import re
 from app.analyzers.base import Finding
 from app.schemas import EmailInput
 
+CATEGORY = "Sender authentication"
+
 TRUSTED_AUTHSERV_ID = "mx.google.com"
 
 # Matches results such as "spf=pass", "dkim=fail", "dmarc=softfail"

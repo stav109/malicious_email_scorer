@@ -17,6 +17,8 @@ from app.analyzers.brands import BRANDS
 from app.analyzers.domains import base_domain
 from app.schemas import EmailInput
 
+CATEGORY = "Links"
+
 # Cap work per email: a hostile email could contain thousands of links
 MAX_LINKS = 300
 

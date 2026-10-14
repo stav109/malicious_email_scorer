@@ -17,6 +17,8 @@ from app.analyzers.domains import base_domain, parse_address
 from app.analyzers.links import _host, extract_links
 from app.schemas import EmailInput
 
+CATEGORY = "Look-alike domains"
+
 MAX_LABEL = 63  # longest valid DNS label; also bounds the distance computation
 
 # Official domain names too generic to compare against ("live", "office"...)

@@ -166,55 +166,142 @@ function parseAnalysisResult(text) {
     obj.score >= 0 &&
     obj.score <= 100 &&
     VERDICTS.indexOf(obj.verdict) !== -1 &&
-    Array.isArray(obj.reasons);
+    (Array.isArray(obj.findings) || Array.isArray(obj.reasons));
   if (!valid) {
     throw appError("backend", "Response has an unexpected format");
   }
 
+  // Older backends only send "reasons"; treat them as uncategorized findings
+  const rawFindings = Array.isArray(obj.findings)
+    ? obj.findings
+    : obj.reasons.map(function (r) { return { category: "Other", points: 0, reason: r }; });
+
   return {
     score: Math.round(obj.score),
     verdict: obj.verdict,
-    reasons: obj.reasons.slice(0, MAX_REASONS).map(function (r) {
-      return truncate(String(r), MAX_REASON_CHARS);
+    findings: rawFindings.slice(0, MAX_REASONS).map(function (f) {
+      const points = Number(f && f.points);
+      return {
+        category: truncate(String((f && f.category) || "Other"), 50),
+        points: isFinite(points) ? Math.max(0, Math.min(100, Math.round(points))) : 0,
+        reason: truncate(String((f && f.reason) || ""), MAX_REASON_CHARS),
+      };
     }),
   };
 }
 
 // ===== Cards =====
 
-function buildResultCard(result) {
-  const verdictLabels = {
-    safe: "✅ Safe",
-    suspicious: "⚠️ Suspicious",
-    malicious: "⛔ Malicious",
-  };
+// Presentation per verdict. Colors are Google's red/amber/green.
+const VERDICT_STYLE = {
+  safe: {
+    label: "Safe",
+    icon: "✅",
+    color: "#188038",
+    risk: "Low risk",
+    advice: "No significant risk signals were found. Still, be careful with unexpected requests for money or passwords.",
+  },
+  suspicious: {
+    label: "Suspicious",
+    icon: "⚠️",
+    color: "#e37400",
+    risk: "Medium risk",
+    advice: "Be careful. Don't click links, open attachments or share details unless you can confirm the sender another way, for example by calling them.",
+  },
+  malicious: {
+    label: "Malicious",
+    icon: "⛔",
+    color: "#d93025",
+    risk: "High risk",
+    advice: "Don't click links, open attachments or reply. Report it (⋮ menu → Report phishing) and delete it.",
+  },
+};
 
+// Icons per analyzer category. Categories come from the backend, so unknown
+// ones are shown with a neutral bullet instead of trusting their text for styling.
+const CATEGORY_ICONS = {
+  "Sender authentication": "🔐",
+  "Sender identity": "👤",
+  "Links": "🔗",
+  "Look-alike domains": "🎭",
+  "Attachments": "📎",
+  "Content": "💬",
+};
+
+/** "██████░░░░" style bar, 10 blocks, colored by verdict. */
+function scoreBar(score, color) {
+  const filled = Math.round(score / 10);
+  return '<font color="' + color + '">' + "█".repeat(filled) + "</font>" +
+    '<font color="#dadce0">' + "█".repeat(10 - filled) + "</font>";
+}
+
+/** Groups findings by category, with the riskiest category first. */
+function groupByCategory(findings) {
+  const groups = {};
+  const order = [];
+  findings.forEach(function (f) {
+    if (!groups[f.category]) {
+      groups[f.category] = { category: f.category, total: 0, items: [] };
+      order.push(f.category);
+    }
+    groups[f.category].items.push(f);
+    groups[f.category].total += f.points;
+  });
+  return order
+    .map(function (c) { return groups[c]; })
+    .sort(function (a, b) { return b.total - a.total; });
+}
+
+function buildResultCard(result) {
+  const style = VERDICT_STYLE[result.verdict];
+
+  // 1. Verdict, colored, with a visual score
   const summary = CardService.newCardSection()
     .addWidget(
       CardService.newDecoratedText()
         .setTopLabel("Verdict")
-        .setText("<b>" + verdictLabels[result.verdict] + "</b>")
+        .setText('<font color="' + style.color + '"><b>' + style.icon + " " + style.label + "</b></font>")
     )
     .addWidget(
       CardService.newDecoratedText()
         .setTopLabel("Risk score")
-        .setText(result.score + " / 100")
+        .setText(scoreBar(result.score, style.color) + "  <b>" + result.score + "</b>/100 · " + style.risk)
     );
 
-  const reasons = CardService.newCardSection().setHeader("Why");
-  if (result.reasons.length === 0) {
-    reasons.addWidget(CardService.newTextParagraph().setText("No risk signals found."));
+  // 2. What to do
+  const advice = CardService.newCardSection()
+    .setHeader("What should I do?")
+    .addWidget(CardService.newTextParagraph().setText(style.advice));
+
+  const card = CardService.newCardBuilder()
+    .setHeader(CardService.newCardHeader().setTitle("Email analysis"))
+    .addSection(summary)
+    .addSection(advice);
+
+  // 3. Reasons, grouped by category
+  if (result.findings.length === 0) {
+    card.addSection(
+      CardService.newCardSection()
+        .setHeader("Why")
+        .addWidget(CardService.newTextParagraph().setText("No risk signals found."))
+    );
   } else {
-    result.reasons.forEach(function (reason) {
-      reasons.addWidget(CardService.newTextParagraph().setText("• " + escapeHtml(reason)));
+    groupByCategory(result.findings).forEach(function (group) {
+      const icon = CATEGORY_ICONS[group.category] || "•";
+      const section = CardService.newCardSection()
+        .setHeader(icon + " " + escapeHtml(group.category));
+      group.items.forEach(function (f) {
+        section.addWidget(
+          CardService.newTextParagraph().setText(
+            '<font color="' + style.color + '"><b>+' + f.points + "</b></font>  " + escapeHtml(f.reason)
+          )
+        );
+      });
+      card.addSection(section);
     });
   }
 
-  return CardService.newCardBuilder()
-    .setHeader(CardService.newCardHeader().setTitle("Email analysis"))
-    .addSection(summary)
-    .addSection(reasons)
-    .build();
+  return card.build();
 }
 
 function buildErrorCard(message) {

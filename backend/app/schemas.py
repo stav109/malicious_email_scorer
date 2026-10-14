@@ -46,7 +46,14 @@ class EmailInput(StrictModel):
     attachments: list[Attachment] = Field(default_factory=list, max_length=MAX_ATTACHMENTS)
 
 
+class FindingOut(BaseModel):
+    category: str
+    points: int
+    reason: str
+
+
 class AnalysisResult(BaseModel):
     score: int = Field(ge=0, le=100)
     verdict: Literal["safe", "suspicious", "malicious"]
-    reasons: list[str]
+    reasons: list[str]  # kept for older add-on versions; same order as findings
+    findings: list[FindingOut] = []

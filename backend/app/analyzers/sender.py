@@ -12,6 +12,8 @@ from app.analyzers.brands import BRANDS
 from app.analyzers.domains import base_domain, is_free_email, parse_address
 from app.schemas import EmailInput
 
+CATEGORY = "Sender identity"
+
 EMAIL_IN_TEXT = re.compile(r"[\w.+-]+@([\w-]+\.[\w.-]+)")
 
 

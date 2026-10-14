@@ -8,6 +8,8 @@ import re
 from app.analyzers.base import Finding
 from app.schemas import EmailInput
 
+CATEGORY = "Attachments"
+
 # Files Windows will execute directly when double-clicked
 EXECUTABLE = {
     "exe", "scr", "com", "pif", "bat", "cmd", "vbs", "vbe", "js", "jse", "wsf",
