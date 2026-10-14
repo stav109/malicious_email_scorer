@@ -206,14 +206,14 @@ const VERDICT_STYLE = {
     icon: "⚠️",
     color: "#e37400",
     risk: "Medium risk",
-    advice: "Be careful. Don't click links, open attachments or share details unless you can confirm the sender another way, for example by calling them.",
+    advice: "Be careful. Don't click links, open attachments or share details unless you can confirm the sender another way.",
   },
   malicious: {
     label: "Malicious",
     icon: "⛔",
     color: "#d93025",
     risk: "High risk",
-    advice: "Don't click links, open attachments or reply. Report it (⋮ menu → Report phishing) and delete it.",
+    advice: "Do not click links, open attachments, or reply. Report it as phishing and delete it.",
   },
 };
 
