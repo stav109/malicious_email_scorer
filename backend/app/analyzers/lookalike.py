@@ -14,7 +14,7 @@ to mention the brand at all, and it also checks every link's domain.
 from app.analyzers.base import Finding
 from app.analyzers.brands import BRANDS
 from app.analyzers.domains import base_domain, parse_address
-from app.analyzers.links import _host, extract_links
+from app.analyzers.links import extract_links, url_host
 from app.schemas import EmailInput
 
 CATEGORY = "Look-alike domains"
@@ -134,7 +134,7 @@ def _candidate_hosts(email: EmailInput) -> list[str]:
         if domain:
             hosts.append(domain)
     for link in extract_links(email):
-        host = _host(link.href)
+        host = url_host(link.href)
         if host:
             hosts.append(host)
     return list(dict.fromkeys(hosts))

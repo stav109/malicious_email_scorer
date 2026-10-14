@@ -55,5 +55,5 @@ class FindingOut(BaseModel):
 class AnalysisResult(BaseModel):
     score: int = Field(ge=0, le=100)
     verdict: Literal["safe", "suspicious", "malicious"]
-    reasons: list[str]  # kept for older add-on versions; same order as findings
+    reasons: list[str]  # plain-text reasons, in the same order as findings
     findings: list[FindingOut] = []

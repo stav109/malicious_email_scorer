@@ -105,7 +105,7 @@ def extract_links(email: EmailInput) -> list[Link]:
     return unique[:MAX_LINKS]
 
 
-def _host(url: str) -> str | None:
+def url_host(url: str) -> str | None:
     """Returns the lowercase host of an http(s) URL, or None for other links."""
     try:
         parts = urlsplit(url)
@@ -136,7 +136,7 @@ def analyze(email: EmailInput) -> list[Finding]:
     }
 
     for link in extract_links(email):
-        host = _host(link.href)
+        host = url_host(link.href)
         if host is None:
             continue
         host_base = base_domain(host)

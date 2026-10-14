@@ -29,8 +29,8 @@ def test_hebrew_package_scam():
 
 
 def test_hebrew_with_prefix():
-    # "והחשבון ... נחסם" - Hebrew prefixes must not prevent a match
-    assert signals(body="שימו לב: החשבון שלכם נחסם") == ["content_urgency"]
+    # "והחבילה" is "חבילה" with the prefixes ו and ה; it must still match
+    assert signals(body="שימו לב, והחבילה ממתינה לאיסוף") == ["content_delivery_fee"]
 
 
 def test_each_category_counts_once():

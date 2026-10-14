@@ -171,7 +171,7 @@ function parseAnalysisResult(text) {
     throw appError("backend", "Response has an unexpected format");
   }
 
-  // Older backends only send "reasons"; treat them as uncategorized findings
+  // If "findings" is missing, fall back to the plain "reasons" list
   const rawFindings = Array.isArray(obj.findings)
     ? obj.findings
     : obj.reasons.map(function (r) { return { category: "Other", points: 0, reason: r }; });
