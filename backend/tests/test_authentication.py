@@ -30,9 +30,10 @@ def test_dkim_fail_ignored_if_another_signature_passes():
     assert signals(email) == []
 
 
-def test_missing_header_is_unverified():
+def test_missing_header_is_internal_mail_with_no_findings():
+    # Email sent to yourself or within your organization has no such header
     email = make_email()
-    assert signals(email) == ["auth_unverified"]
+    assert signals(email) == []
 
 
 def test_header_not_written_by_gmail_is_not_trusted():

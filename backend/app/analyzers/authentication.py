@@ -37,13 +37,20 @@ def parse_auth_results(header: str) -> dict[str, list[str]] | None:
 
 
 def analyze(email: EmailInput) -> list[Finding]:
-    results = parse_auth_results(email.headers.authenticationResults)
+    header = email.headers.authenticationResults
 
+    # Gmail stamps every email that arrives from outside. Mail sent within the
+    # same account (or the same Google Workspace organization) never crosses
+    # that border, so it has no header at all. That is not a risk signal.
+    if not header.strip():
+        return []
+
+    results = parse_auth_results(header)
     if results is None:
         return [Finding(
             signal="auth_unverified",
             points=10,
-            reason="Gmail's sender authentication results are missing, so the sender could not be verified.",
+            reason="The sender's authentication results were not written by Gmail, so the sender could not be verified.",
         )]
 
     # DMARC is the strongest signal: it combines SPF/DKIM with a check that the
